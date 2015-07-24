@@ -213,21 +213,23 @@ rtmp: squeezeplay
 
 # squeezeplay
 squeezeplay/Makefile:
-	cd squeezeplay; SDL_CONFIG=${SDL_CONFIG} ./configure ${ENABLE_SPPRIVATE} ${ENABLE_PROFILING} --target=${TARGET} --prefix=${PREFIX}
+	cd squeezeplay; SDL_CONFIG=${SDL_CONFIG} ./configure ${ENABLE_SPPRIVATE} ${ENABLE_PROFILING} --target=${TARGET} --prefix=
 
 squeezeplay: squeezeplay/Makefile
 	cd squeezeplay; make && make install
 
 squeezeplay_desktop/Makefile:
-	cd squeezeplay_desktop; SDL_CONFIG=${SDL_CONFIG} ./configure --target=${TARGET} --prefix=${PREFIX}
+	cd squeezeplay_desktop; SDL_CONFIG=${SDL_CONFIG} ./configure --target=${TARGET} --prefix=
 
 squeezeplay_desktop: squeezeplay_desktop/Makefile
 	cd squeezeplay_desktop; make install
+	cp -af ${PREFIX}/home/*/build/linux/share/jive/applets/* ${PREFIX}/share/jive/applets/
 	cp squeezeplay_desktop/squeezeplay.sh ${PREFIX}/bin/
 	chmod +x ${PREFIX}/bin/squeezeplay.sh
+	rm -rf ${PREFIX}/home/
 
 squeezeplay_contrib: squeezeplay/Makefile
-	cd squeezeplay_contrib; make PREFIX=${PREFIX}
+	cd squeezeplay_contrib; make
 
 squeezeplay_private/Makefile:
 	cd squeezeplay_private; SDL_CONFIG=${SDL_CONFIG} ./configure --target=${TARGET} --prefix=${PREFIX} --enable-wma --enable-aac
