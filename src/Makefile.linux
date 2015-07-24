@@ -10,9 +10,9 @@
 SRC_DIR = $(realpath ${PWD})
 BASE_DIR = $(dir ${SRC_DIR})
 
-export BUILD_TOP=$(BASE_DIR)/build/linux
+export BUILD_TOP=${RPM_BUILD_ROOT}/build/linux
 
-DESTDIR=${BUILD_TOP}
+export DESTDIR=${BUILD_TOP}
 export PREFIX=${DESTDIR}
 
 export CFLAGS=-I${PREFIX}/include -I${PREFIX}/include/SDL -I${PREFIX}/include/freetype2 -g -fPIC
@@ -22,8 +22,9 @@ export TOOLPATH = $(shell dirname `which gcc`)
 
 export SDL_CONFIG = ${BUILD_TOP}/bin/sdl-config
 
-ENABLE_PROFILING=--enable-profiling --disable-shared
-USE_MMX=--enable-mmx
+ENABLE_PROFILING=--enable-profiling --disable-static
+# --disable-shared
+USE_MMX=--disable-mmx
 
 # Override to yes to build closed source squeezeplay libraries 
 SPPRIVATE=no
@@ -47,7 +48,7 @@ all: sdl-all lua-all app
 #####
 
 .PHONY: sdl-all freetype sdl sdl-image sdl-tff sdl-gfx c-ares
-sdl-all: freetype sdl sdl-ttf sdl-image sdl-gfx
+sdl-all: freetype sdl sdl-ttf png sdl-image sdl-gfx
 
 generated:
 	mkdir -p generated
@@ -55,36 +56,44 @@ generated:
 
 # freetype
 freetype-2.1.10/config.mk:
-	cd freetype-2.1.10; ./configure --enable-shared ${ENABLE_PROFILING} --target=${TARGET} --prefix=${PREFIX}
+	cd freetype-2.1.10; ./configure --enable-shared ${ENABLE_PROFILING} --target=${TARGET} --prefix=
 
 freetype: freetype-2.1.10/config.mk
-	cd freetype-2.1.10; make; make install
+	cd freetype-2.1.10; make && make install
 
 # sdl
 SDL-1.2.13/Makefile:
 	cd SDL-1.2.13; ./configure  ${ENABLE_PROFILING} --target=${TARGET} --prefix=${PREFIX}
-	#cd SDL-1.2.13; ./configure  ${ENABLE_PROFILING} --host=${HOST} --target=${TARGET} --prefix=${PREFIX}
 
 sdl: SDL-1.2.13/Makefile
 	cd SDL-1.2.13; make && make install
 
+# png
+libpng-1.2.32/Makefile:
+	cd libpng-1.2.32; ./configure ${ENABLE_PROFILING} --target=${TARGET} --prefix=
+
+png:	libpng-1.2.32/Makefile
+	cd libpng-1.2.32; make && make install
+
 # sdl_image (requires jpeg tiff png)
 SDL_image-1.2.5/Makefile:
-	cd SDL_image-1.2.5; SDL_CONFIG=${PREFIX}/bin/sdl-config ./configure --disable-tif  --target=${TARGET} ${ENABLE_PROFILING} --prefix=${PREFIX} ${LIBPNG} ${LIBJPEG}
+	cd SDL_image-1.2.5; SDL_CONFIG=${PREFIX}/bin/sdl-config ./configure --disable-tif  --target=${TARGET} ${ENABLE_PROFILING} --prefix= ${LIBPNG} ${LIBJPEG}
 
 sdl-image: SDL_image-1.2.5/Makefile
 	cd SDL_image-1.2.5; make && make install
+	perl -pi -e s"|/lib/libpng.la|${PREFIX}/lib/libpng.la|" ${PREFIX}/lib/libSDL_image.la
 
 # sdl_ttf
 SDL_ttf-2.0.8/Makefile:
-	cd SDL_ttf-2.0.8; SDL_CONFIG=${PREFIX}/bin/sdl-config ./configure  ${ENABLE_PROFILING} --target=${TARGET} --prefix=${PREFIX} --with-freetype-prefix=${PREFIX} --without-opengl
+	cd SDL_ttf-2.0.8; SDL_CONFIG=${PREFIX}/bin/sdl-config ./configure  ${ENABLE_PROFILING} --target=${TARGET} --prefix= --with-freetype-prefix= --without-opengl
 
 sdl-ttf: SDL_ttf-2.0.8/Makefile
 	cd SDL_ttf-2.0.8; make && make install
+	perl -pi -e s"|/lib/libfreetype.la|${PREFIX}/lib/libfreetype.la|" ${PREFIX}/lib/libSDL_ttf.la
 
 # sdl_gfx
 SDL_gfx-2.0.15/Makefile:
-	cd SDL_gfx-2.0.15; ./configure ${ENABLE_PROFILING} ${USE_MMX} --target=${TARGET} --prefix=${PREFIX}
+	cd SDL_gfx-2.0.15; ./configure ${ENABLE_PROFILING} ${USE_MMX} --target=${TARGET} --prefix=
 
 sdl-gfx: SDL_gfx-2.0.15/Makefile
 	cd SDL_gfx-2.0.15; make && make install
@@ -160,30 +169,26 @@ tolua++: lua
 #
 
 .PHONY: app portaudio flac libmad tremor squeezeplay squeezeplay_desktop squeezeplay_contrib squeezeplay_private freefont freefont-debian axtls rtmp
-app: portaudio flac libmad tremor ${SPPRIVATE_TARGETS} squeezeplay squeezeplay_desktop squeezeplay_contrib freefont rtmp squeezeplay-tgz 
+app: portaudio flac libmad tremor ${SPPRIVATE_TARGETS} squeezeplay squeezeplay_desktop squeezeplay_contrib freefont rtmp
 
 # portaudio
 portaudio_v19_1360/Makefile:
-	cd portaudio_v19_1360; ./configure --target=${TARGET} --prefix=${PREFIX}
+	cd portaudio_v19_1360; ./configure --target=${TARGET} --prefix=
 
 portaudio: portaudio_v19_1360/Makefile
 	cd portaudio_v19_1360; make && make install
 
 # flac
 flac-1.2.1/Makefile:
-	cd flac-1.2.1; ./configure --disable-xmms-plugin --target=${TARGET} --prefix=${PREFIX}
+	cd flac-1.2.1; ./configure --disable-xmms-plugin --target=${TARGET} --prefix=
 
 flac: flac-1.2.1/Makefile
 	cd flac-1.2.1; make && make install
 
 #libmad
 LIBMAD_DIR=libmad-0.15.1b
-generated/${LIBMAD_DIR}/Makefile.am:
-	mkdir -p generated; cd generated; wget ftp://ftp.mars.org/pub/mpeg/${LIBMAD_DIR}.tar.gz; tar xvf ./${LIBMAD_DIR}.tar.gz; \
-
-		
-generated/${LIBMAD_DIR}/Makefile: generated/${LIBMAD_DIR}/Makefile.am 
-	cd generated/${LIBMAD_DIR}; ./configure --target=${TARGET} --prefix=${PREFIX} 
+generated/${LIBMAD_DIR}/Makefile: generated/${LIBMAD_DIR}/Makefile.am
+	cd generated/${LIBMAD_DIR}; ./configure --target=${TARGET} --prefix=
 
 libmad: generated/${LIBMAD_DIR}/Makefile.am generated/${LIBMAD_DIR}/Makefile
 	cd generated/${LIBMAD_DIR}; make && make install
@@ -191,22 +196,15 @@ libmad: generated/${LIBMAD_DIR}/Makefile.am generated/${LIBMAD_DIR}/Makefile
 
 # ogg
 Tremor/Makefile:
-	cd Tremor; CFLAGS="-DSQUEEZEPLAY" ./configure --target=${TARGET} --prefix=${PREFIX}
+	cd Tremor; ./autogen.sh; CFLAGS="-DSQUEEZEPLAY" ./configure --target=${TARGET} --prefix=
 
 tremor: Tremor/Makefile
 	cd Tremor; make && make install
+	# ugly hack to get tremor in the good place
+	mv -vf ${BUILD_TOP}/home/*/*/*/include/tremor ${BUILD_TOP}/include
+	mv -vf ${BUILD_TOP}/home/*/*/*/lib/* ${BUILD_TOP}/lib
+	rm -rvf ${BUILD_TOP}/home
 
-
-# axTLS
-AXTLS_DIR = generated/axTLS
-AXTLS_TAR = axTLS-1.2.0.tar.gz
-${AXTLS_DIR}/Makefile: generated
-	cd generated; tar xvf ../${AXTLS_TAR}
-	cp axTLS.config ${AXTLS_DIR}/config/.config
-	echo "PREFIX=\"${PREFIX}\"" >> ${AXTLS_DIR}/config/.config
-
-axtls: ${AXTLS_DIR}/Makefile
-	cd ${AXTLS_DIR}; make oldconfig && make && make install
 
 rtmp: squeezeplay
 	cd luartmp-squeezeplay; make
@@ -235,7 +233,7 @@ squeezeplay_private/Makefile:
 	cd squeezeplay_private; SDL_CONFIG=${SDL_CONFIG} ./configure --target=${TARGET} --prefix=${PREFIX} --enable-wma --enable-aac
 
 squeezeplay_private: squeezeplay_private/Makefile
-	cd squeezeplay_private; make PREFIX=${PREFIX} install
+	cd squeezeplay_private; make PREFIX= install
 
 # freefont
 freefont:
@@ -249,15 +247,6 @@ freefont:
 squeezeplay-tgz: squeezeplay/Makefile
 	cd squeezeplay; make squeezeplay-tgz
 
-#
-# Allow user to call the -deb build and it runs both the 'all' and then packages it
-#
-
-.PHONY: squeezeplay-deb
-squeezeplay-deb: all squeezeplay-deb-make
-
-squeezeplay-deb-make: squeezeplay/Makefile
-	cd squeezeplay; make squeezeplay-deb
 
 .PHONY: clean_generated
 clean_generated:
