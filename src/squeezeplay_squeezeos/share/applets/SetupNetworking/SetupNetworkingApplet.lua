@@ -174,28 +174,11 @@ function _connectionType(self)
 	if self.ethIface then
 		Task("halfDuplexBugVerification", self,
 			function()
-				local pingOK = false
 				local status = self.ethIface:t_wpaStatus()
-				if status.link and status.ip_dns then
-					local window = Popup("waiting_popup")
-					window:setAllowScreensaver(false)
-
-					window:addWidget(Icon("icon_connecting"))
-					window:addWidget(Label("text", self:string("NETWORK_ETHERNET_CHECK")))
-					self:tieAndShowWindow(window)
-
-					-- First ping dns server to prevent long
-					--  delays while trying to resolve mysb.com
-					if self.ethIface:pingServer(status.ip_dns) then
-						-- Then ping mysb.com
-						pingOK = self.ethIface:pingServer(jnt:getSNHostname())
-					end
-				end
-
-				if pingOK then
+				if status.link then
 					return _halfDuplexBugVerification(self, self.ethIface)
 				else
-					-- Ethernet available but no link or ping failed - do a wireless scan
+					-- Ethernet available but no link - do a wireless scan
 					return _networkScan(self, self.wlanIface)
 				end
 			end
@@ -438,7 +421,7 @@ function _networkScanComplete(self, iface)
 	menu:addItem({
 -- fm+
 --		text = self:string("NETWORK_ENTER_ANOTHER_NETWORK"),
-		text = "[" .. tostring(self:string("NETWORK_NETWORK_NAME")) .. "]",
+		text = self:string("NETWORK_ENTER_SSID"),
 -- fm-
 		sound = "WINDOWSHOW",
 		callback = function()
@@ -447,7 +430,7 @@ function _networkScanComplete(self, iface)
 			_enterSSID(self, iface)
 -- fm-
 		end,
-		weight = 10
+		weight = 3
 	})
 
 -- fm+
@@ -566,25 +549,11 @@ function _scanResults(self, iface)
 
 			-- Update wireless signal quality
 			item.arrow:setStyle("wirelessLevel" .. (entry.quality or 0))
-
--- fm+
-			item.weight = 4 - (entry.quality or 0)
-			item.text = ssid
--- fm-
-
 			if self.scanMenu then
 				self.scanMenu:updatedItem(item)
 			end
 		end
 	end
-
--- fm+
-	if self.scanMenu then
-		self.scanMenu:setComparator(SimpleMenu.itemComparatorWeightAlpha)
-	end
--- fm-
-
-
 end
 
 -- fm+

@@ -96,10 +96,11 @@ static int jiveL_perfhook(lua_State *L) {
 	lua_pushlightuserdata(L, (char *)((unsigned long)L) + 1);
 	hd = lua_newuserdata(L, sizeof(struct perf_hook_data));
 	lua_settable(L, LUA_REGISTRYINDEX);
-
+/*
 	memset(hd, 0, sizeof(hd));
 	hd->hook_threshold = (lua_tointeger(L, 1) * CLOCKS_PER_SEC) / 1000;
 	hd->kill_threshold = (luaL_optinteger(L, 2, 0) * CLOCKS_PER_SEC) / 1000;
+*/
 
 	return 0;
 }

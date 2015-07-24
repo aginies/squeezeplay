@@ -164,11 +164,22 @@ SDL_X11_SYM(Bool,XShmQueryExtension,(Display* a),(a),return)
  * Not required...these only exist in code in headers on some 64-bit platforms,
  *  and are removed via macros elsewhere, so it's safe for them to be missing.
  */
+//#if 0
 #ifdef LONG64
 SDL_X11_MODULE(IO_32BIT)
-SDL_X11_SYM(int,_XData32,(Display *dpy,register long *data,unsigned len),(dpy,data,len),return)
+//#if SDL_VIDEO_DRIVER_X11_CONST_PARAM_XDATA32
+SDL_X11_SYM(int,_XData32,(Display *dpy,register _Xconst long *data,unsigned len),(dpy,data,len),return)
+//#else
+//SDL_X11_SYM(int,_XData32,(Display *dpy,register long *data,unsigned len),(dpy,data,len),return)
 SDL_X11_SYM(void,_XRead32,(Display *dpy,register long *data,long len),(dpy,data,len),)
 #endif
+//#endif
+
+/*
+ * libX11 1.4.99.1 added _XGetRequest, and macros use it behind the scenes.
+ */
+SDL_X11_MODULE(XGETREQUEST)
+SDL_X11_SYM(void *,_XGetRequest,(Display* a,CARD8 b,size_t c),(a,b,c),return)
 
 /*
  * These only show up on some variants of Unix.

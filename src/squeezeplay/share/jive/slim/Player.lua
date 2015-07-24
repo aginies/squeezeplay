@@ -641,7 +641,7 @@ function free(self, slimServer, serverDeleteOnly)
 	end
 
 	if self.slimServer then
-		if self.isOnStage then self:offStage() end
+		self:offStage()
 
 		self.slimServer:_deletePlayer(self)
 		self.slimServer = false
@@ -1242,35 +1242,18 @@ function _process_status(self, event)
 	log:debug("self.state['alarm_state']: ", self.state['alarm_state'], ",  oldState['alarm_state']: ", oldState['alarm_state'])
 	log:debug("self.state['alarm_next']: ", self.state['alarm_next'], ",  oldState['alarm_next']: ", oldState['alarm_next'])
 
-	log:debug("self.state['alarm_version']: ", self.state['alarm_version'], ",  oldState['alarm_version']: ", oldState['alarm_version'])
-	log:debug("self.state['alarm_next2']: ", self.state['alarm_next2'], ",  oldState['alarm_next2']: ", oldState['alarm_next2'])
-	log:debug("self.state['alarm_repeat']: ", self.state['alarm_repeat'], ",  oldState['alarm_repeat']: ", oldState['alarm_repeat'])
-	log:debug("self.state['alarm_days']: ", self.state['alarm_days'], ",  oldState['alarm_days']: ", oldState['alarm_days'])
-
-	if self.state['alarm_state'] ~= oldState['alarm_state'] or
-	   self.state['alarm_next'] ~= oldState['alarm_next'] or
-	   self.state['alarm_version'] ~= oldState['alarm_version'] or
-	   self.state['alarm_next2'] ~= oldState['alarm_next2'] or
-	   self.state['alarm_repeat'] ~= oldState['alarm_repeat'] or
-	   self.state['alarm_days'] ~= oldState['alarm_days'] then
+	if self.state['alarm_state'] ~= oldState['alarm_state'] or self.state['alarm_next'] ~= oldState['alarm_next'] then
 		log:debug('notify_playerAlarmState')
 		-- none from server for alarm_state changes this to nil
 		if self.state['alarm_state'] == 'none' then
 			self.alarmState = nil
 			self.alarmNext  = nil
---			self.jnt:notify('playerAlarmState', self, 'none', nil)
+			self.jnt:notify('playerAlarmState', self, 'none', nil)
 		else
 			self.alarmState = self.state['alarm_state']
 			self.alarmNext  = tonumber(self.state['alarm_next'])
---			self.jnt:notify('playerAlarmState', self, self.state['alarm_state'], self.state['alarm_next'] and tonumber(self.state['alarm_next']) or nil)
+			self.jnt:notify('playerAlarmState', self, self.state['alarm_state'], self.state['alarm_next'] and tonumber(self.state['alarm_next']) or nil)
 		end
-
-		self.alarmVersion = tonumber(self.state['alarm_version'])
-		self.alarmNext2 = tonumber(self.state['alarm_next2'])
-		self.alarmRepeat = tonumber(self.state['alarm_repeat'])
-		self.alarmDays = self.state['alarm_days']
-		self.jnt:notify('playerAlarmState', self, self.state['alarm_state'], self.alarmNext, self.alarmVersion, self.alarmNext2, self.alarmRepeat, self.alarmDays)
-
 	end
 
 	if self.state['playlist shuffle'] ~= oldState['playlist shuffle'] then
