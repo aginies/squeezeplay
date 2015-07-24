@@ -10,7 +10,7 @@
 SRC_DIR = $(realpath ${PWD})
 BASE_DIR = $(dir ${SRC_DIR})
 
-export BUILD_TOP=${RPM_BUILD_ROOT}/build/linux
+export BUILD_TOP=${RPM_BUILD_ROOT}/opt
 
 export DESTDIR=${BUILD_TOP}
 export PREFIX=${DESTDIR}
