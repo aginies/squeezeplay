@@ -1,7 +1,7 @@
 --[[
 =head1 NAME
 
-applets.FullHD_mediumSkin.FullHD_mediumSkinSkinApplet
+applets.HD_mediumSkin.HD_mediumSkinSkinApplet
 
 =head1 DESCRIPTION
 
@@ -40,7 +40,7 @@ local table                  = require("jive.utils.table")
 local debug                  = require("jive.utils.debug")
 local autotable              = require("jive.utils.autotable")
 
-local log                    = require("jive.utils.log").logger("applet.FullHD_mediumSkin")
+local log                    = require("jive.utils.log").logger("applet.HD_mediumSkin")
 
 local EVENT_ACTION           = jive.ui.EVENT_ACTION
 local EVENT_CONSUME          = jive.ui.EVENT_CONSUME
