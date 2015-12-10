@@ -5,15 +5,13 @@ echo "- copy source"
 cp -a src src_tarball
 cd src_tarball
 
-echo "- remove unwanted"
-rm -rf freefont-20090104
-rm -rf freetype-2.1.10
-rm -rf generated
-rm -rf libpng-1.2.32
-rm -rf SDL-1.2.13
-rm -rf SDL_gfx-2.0.15
-rm -rf SDL_image-1.2.5
-rm -rf SDL_ttf-2.0.8
+#echo "- remove unwanted"
+#rm -rf freetype-2.1.10
+#rm -rf libpng-1.2.32
+#rm -rf SDL-1.2.13
+#rm -rf SDL_gfx-2.0.15
+#rm -rf SDL_image-1.2.5
+#rm -rf SDL_ttf-2.0.8
 
 echo "- remove .git"
 find . -name .git -exec rm -rf {} \;
