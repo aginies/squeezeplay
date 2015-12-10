@@ -24,13 +24,14 @@ static float calcCallTime(lua_State *L);
 
 /* Indices for the main profiler stack and for the original exit function */
 static int exit_id;
+static int profstate_id;
 
 /* called by Lua (via the callhook mechanism) */
 static void callhook(lua_State *L, lua_Debug *ar) {
 	int currentline;
 	lua_Debug previous_ar;
 	lprofP_STATE* S;
-	lua_pushlightuserdata(L, ((unsigned int)L) + 1);
+	lua_pushlightuserdata(L, &profstate_id);
 	lua_gettable(L, LUA_REGISTRYINDEX);
 	S = (lprofP_STATE*)lua_touserdata(L, -1);
 
@@ -131,7 +132,7 @@ static int profiler_init(lua_State *L) {
 	 * add one to L when used as a key, otherwise this causes the
 	 * thread to be garbage collected. A bug in the lua GC?
 	 */
-	lua_pushlightuserdata(L, ((unsigned int)L) + 1);
+	lua_pushlightuserdata(L, &profstate_id);
 	lua_pushlightuserdata(L, S);
 	lua_settable(L, LUA_REGISTRYINDEX);
 	
@@ -164,7 +165,7 @@ static int profiler_init(lua_State *L) {
 static int profiler_stop(lua_State *L) {
 	lprofP_STATE* S;
 	lua_sethook(L, NULL, LUA_MASKCALL | LUA_MASKRET, 0);
-	lua_pushlightuserdata(L, ((unsigned int)L + 1));
+	lua_pushlightuserdata(L, &profstate_id);
 	lua_gettable(L, LUA_REGISTRYINDEX);
 	S = (lprofP_STATE*)lua_touserdata(L, -1);
 	/* leave all functions under execution */
