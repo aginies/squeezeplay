@@ -1,0 +1,12 @@
+#!/bin/sh
+VERSION=7.8.0
+cp -a src src_tarball
+cd src_tarball
+find . -name .git -exec rm -rf {} \;
+
+cd ..
+
+ln -sf src_tarball squeezeplay-$VERSION
+tar cfhj squeezeplay-$VERSION.tar.bz2 squeezeplay-$VERSION
+
+rm -rf src_tarball squeezeplay-$VERSION
