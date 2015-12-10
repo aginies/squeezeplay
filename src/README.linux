@@ -2,5 +2,6 @@ SQUEEZEPLAY
 
 - Cleanup Package to reduce size and get it buildable for openSUSE (currently 13.2)
 - add a FUllHD theme to be able to use it on large screen
+- add HD theme
 
 Needs more cleanup in subpackages (dependencies).
