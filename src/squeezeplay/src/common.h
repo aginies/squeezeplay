@@ -100,7 +100,8 @@ typedef _W64 int   ssize_t;
 #define LIBRARY_EXT		"so"
 #endif /* !DIR_SEPARATOR_CHAR */
 
-#include <SDL.h>
+#include <SDL/SDL.h>
+
 
 #include "lua.h"
 #include "lauxlib.h"

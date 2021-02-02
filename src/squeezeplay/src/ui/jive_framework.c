@@ -9,7 +9,16 @@
 
 #include <time.h>
 
-#include <SDL_syswm.h>
+#include <SDL/SDL_syswm.h>
+#include <SDL/SDL_stdinc.h>
+#include <SDL/SDL.h>
+#include <X11/XF86keysym.h>
+
+/*
+   Added for jive - return number of events in the event queue
+*/
+extern DECLSPEC int SDLCALL SDL_EventQueueLength(void);
+
 
 int (*jive_sdlevent_pump)(lua_State *L);
 int (*jive_sdlfilter_pump)(const SDL_Event *event);
@@ -84,13 +93,13 @@ static struct jive_keymap keymap[] = {
 	{ SDLK_RETURN,		JIVE_KEY_GO },
 	{ SDLK_LEFT,		JIVE_KEY_BACK },
 	{ SDLK_HOME,		JIVE_KEY_HOME },
-	{ SDLK_AudioPlay,	JIVE_KEY_PLAY },
-	{ SDLK_AudioPause,	JIVE_KEY_PAUSE },
+	{ XF86XK_AudioPlay,	JIVE_KEY_PLAY },
+	{ SDLK_PAUSE,	JIVE_KEY_PAUSE },
 	{ SDLK_KP_PLUS,		JIVE_KEY_ADD },
-	{ SDLK_AudioPrev,	JIVE_KEY_REW },
-	{ SDLK_AudioNext,	JIVE_KEY_FWD },
-	{ SDLK_AudioRaiseVolume,JIVE_KEY_VOLUME_UP },
-	{ SDLK_AudioLowerVolume,JIVE_KEY_VOLUME_DOWN },
+	{ XF86XK_AudioPrev,	JIVE_KEY_REW },
+	{ XF86XK_AudioNext,	JIVE_KEY_FWD },
+	{ XF86XK_AudioRaiseVolume, JIVE_KEY_VOLUME_UP },
+	{ XF86XK_AudioLowerVolume,JIVE_KEY_VOLUME_DOWN },
 	{ SDLK_PAGEUP,		JIVE_KEY_PAGE_UP },
 	{ SDLK_PAGEDOWN,	JIVE_KEY_PAGE_DOWN },
 	{ SDLK_PRINT,		JIVE_KEY_PRINT },
@@ -101,9 +110,9 @@ static struct jive_keymap keymap[] = {
 	{ SDLK_F4,              JIVE_KEY_PRESET_4 },
 	{ SDLK_F5,              JIVE_KEY_PRESET_5 },
 	{ SDLK_F6,              JIVE_KEY_PRESET_6 },
-	{ SDLK_AudioMute,       JIVE_KEY_MUTE },
+	{ XF86XK_AudioMute,       JIVE_KEY_MUTE },
 	{ SDLK_POWER,           JIVE_KEY_POWER },
-	{ SDLK_Sleep,           JIVE_KEY_ALARM },
+	{ XF86XK_Sleep,           JIVE_KEY_ALARM },
 	{ SDLK_UNKNOWN,		JIVE_KEY_NONE },
 };
 
@@ -131,6 +140,25 @@ static int process_event(lua_State *L, SDL_Event *event);
 static void process_timers(lua_State *L);
 static int filter_events(const SDL_Event *event);
 int jiveL_update_screen(lua_State *L);
+
+#define MAXEVENTS   128
+static struct {
+    SDL_mutex *lock;
+    int active;
+    int head;
+    int tail;
+    SDL_Event event[MAXEVENTS];
+    int wmmsg_next;
+    struct SDL_SysWMmsg wmmsg[MAXEVENTS];
+} SDL_EventQ;
++
+/*
+ * Added for jive - return number of events in the event queue
+ */
+int SDL_EventQueueLength(void)
+{
+        return (SDL_EventQ.tail - SDL_EventQ.head + MAXEVENTS) % MAXEVENTS;
+}
 
 
 int jive_traceback (lua_State *L) {
