@@ -20,7 +20,8 @@ export LDFLAGS=-L${PREFIX}/lib
 
 export TOOLPATH = $(shell dirname `which gcc`)
 
-export SDL_CONFIG = ${BUILD_TOP}/bin/sdl-config
+#export SDL_CONFIG = ${BUILD_TOP}/bin/sdl-config
+export SDL_CONFIG = ${PREFIX}/bin/sdl-config
 
 ENABLE_PROFILING=--enable-profiling --disable-static --disable-rpath
 # --disable-shared
@@ -63,10 +64,11 @@ freetype: freetype-2.1.10/config.mk
 
 # sdl
 SDL-1.2.13/Makefile:
-	cd SDL-1.2.13; ./configure  ${ENABLE_PROFILING} --target=${TARGET} --prefix=${PREFIX}
+	cd SDL-1.2.13; ./configure --target=${TARGET} --prefix=
 
 sdl: SDL-1.2.13/Makefile
-	cd SDL-1.2.13; make && make install
+	cd SDL-1.2.13; make INSTALL_TOP=${PREFIX} && make install INSTALL_TOP=${PREFIX}
+#	cd SDL-1.2.13; make && make install
 
 # png
 libpng-1.2.32/Makefile:
@@ -201,9 +203,9 @@ Tremor/Makefile:
 tremor: Tremor/Makefile
 	cd Tremor; make && make install
 	# ugly hack to get tremor in the good place
-	mv -vf ${BUILD_TOP}/home/*/*/*/include/tremor ${BUILD_TOP}/include
-	mv -vf ${BUILD_TOP}/home/*/*/*/lib/* ${BUILD_TOP}/lib
-	rm -rvf ${BUILD_TOP}/home
+	#mv -vf ${BUILD_TOP}/home/*/*/*/include/tremor ${BUILD_TOP}/include
+	#mv -vf ${BUILD_TOP}/home/*/*/*/lib/* ${BUILD_TOP}/lib
+	#rm -rvf ${BUILD_TOP}/home
 
 
 rtmp: squeezeplay
@@ -222,11 +224,11 @@ squeezeplay_desktop/Makefile:
 	cd squeezeplay_desktop; SDL_CONFIG=${SDL_CONFIG} ./configure --target=${TARGET} --prefix=
 
 squeezeplay_desktop: squeezeplay_desktop/Makefile
-	cd squeezeplay_desktop; make install
-	cp -af ${PREFIX}/home/*/build/linux/share/jive/applets/* ${PREFIX}/share/jive/applets/
+	cd squeezeplay_desktop; make install INSTALL_TOP=${PREFIX}
+#	cp -af ${PREFIX}/home/*/build/linux/share/jive/applets/* ${PREFIX}/share/jive/applets/
 	cp squeezeplay_desktop/squeezeplay.sh ${PREFIX}/bin/
 	chmod +x ${PREFIX}/bin/squeezeplay.sh
-	rm -rf ${PREFIX}/home/
+#	rm -rf ${PREFIX}/home/
 
 squeezeplay_contrib: squeezeplay/Makefile
 	cd squeezeplay_contrib; make
