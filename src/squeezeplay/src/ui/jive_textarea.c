@@ -579,9 +579,9 @@ static void wordwrap(TextareaWidget *peer, char *text, int visible_lines, Uint16
 			break;
 		    }
 
-		case ' ':
-		case ',':
-		case '-':
+		case ' ': break;
+		case ',': break;
+		case '-': break;
 			/* Word break */
 			word_break = next;
 			break;
