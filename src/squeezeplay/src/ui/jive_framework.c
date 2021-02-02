@@ -151,7 +151,7 @@ static struct {
     int wmmsg_next;
     struct SDL_SysWMmsg wmmsg[MAXEVENTS];
 } SDL_EventQ;
-+
+
 /*
  * Added for jive - return number of events in the event queue
  */
